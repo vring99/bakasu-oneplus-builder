@@ -90,7 +90,7 @@ jobs:
         id: bakasu_version
         run: |
           case "$BAKASU_VERSION" in
-            35285) commit=559e08cb7f427ac1327003940e43269c4ee468a0 ;;
+            35285) commit=3c240cb185fe6fa71bfd47c6d987fa8e2004194a ;;
             35275) commit=60dd965f5f4923d34e9df4afb8f95a923447f7b4 ;;
             *) echo "::error::Unsupported BakaSU Pro version: $BAKASU_VERSION"; exit 1 ;;
           esac
