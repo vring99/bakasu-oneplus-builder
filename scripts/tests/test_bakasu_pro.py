@@ -14,6 +14,7 @@ BUILDERS = ("build.yml", "build-make.yml") if GKI else ("Build Kernel OnePlus.ym
 INPUT = "bakasu_version" if GKI else "BAKASU_VERSION"
 PIN = "b89b9d960ec788460a7a6e4289f869762f306957"
 KERNEL_PIN = "60dd965f5f4923d34e9df4afb8f95a923447f7b4"
+KERNEL_PINS = {"35275": KERNEL_PIN, "35285": "559e08cb7f427ac1327003940e43269c4ee468a0"}
 BASH = os.environ.get("BAKASU_TEST_BASH", "bash")
 
 def read(name):
@@ -41,7 +42,8 @@ class ProWorkflowTests(unittest.TestCase):
             job = next(iter(read(name)["jobs"].values()))
             runs = "\n".join(s.get("run", "") for s in job["steps"])
             self.assertIn("raw.githubusercontent.com/vring99/BakaSU/$BAKASU_COMMIT/kernel/setup.sh", runs)
-            self.assertIn(KERNEL_PIN, runs)
+            for pin in KERNEL_PINS.values():
+                self.assertIn(pin, runs)
             self.assertNotIn("SUSFS_KSU_COMMIT", job.get("env", {}))
             step = next(s for s in job["steps"] if s.get("id") == "bakasu_susfs_setup")
             for forbidden in ("curl ", "cp ", "git apply", "path.write", "Please wait susfs update"):
@@ -59,15 +61,15 @@ class ProWorkflowTests(unittest.TestCase):
         for name in BUILDERS:
             job = next(iter(read(name)["jobs"].values()))
             selector = next(s for s in job["steps"] if s.get("id") == "bakasu_version")
-            for version in ("35275", "35274", "35273", "35270", "35268", "35240", "35239", "35238", "35237", "35236", "35235", "35226", "35227", "35266", ""):
+            for version in ("35285", "35275", "35274", "35273", "35270", "35268", "35240", "35239", "35238", "35237", "35236", "35235", "35226", "35227", "35266", ""):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "env"
                     path.touch()
                     result = subprocess.run([BASH, "-e", "-c", selector["run"]], capture_output=True,
                         env=dict(os.environ, BAKASU_VERSION=version, GITHUB_ENV=path.as_posix()))
-                    self.assertEqual(result.returncode == 0, version == "35275", result.stderr)
-                    if version == "35275":
-                        self.assertEqual(path.read_text().strip(), "BAKASU_COMMIT=" + KERNEL_PIN)
+                    self.assertEqual(result.returncode == 0, version in KERNEL_PINS, result.stderr)
+                    if version in KERNEL_PINS:
+                        self.assertEqual(path.read_text().strip(), "BAKASU_COMMIT=" + KERNEL_PINS[version])
 
     @unittest.skipUnless(GKI, "GKI manager workflow only")
     def test_manager_uses_private_signed_artifact(self):

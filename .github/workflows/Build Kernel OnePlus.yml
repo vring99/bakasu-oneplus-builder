@@ -90,6 +90,7 @@ jobs:
         id: bakasu_version
         run: |
           case "$BAKASU_VERSION" in
+            35285) commit=559e08cb7f427ac1327003940e43269c4ee468a0 ;;
             35275) commit=60dd965f5f4923d34e9df4afb8f95a923447f7b4 ;;
             *) echo "::error::Unsupported BakaSU Pro version: $BAKASU_VERSION"; exit 1 ;;
           esac
@@ -541,7 +542,7 @@ jobs:
           fi
           echo 'CONFIG_KSU_FULL_NAME_FORMAT="%TAG_NAME%-%COMMIT_SHA%@R"' >> ./common/arch/arm64/configs/gki_defconfig
           cd ./KernelSU
-          # Read the native release version; maintenance commits keep 35275.
+          # Read the fixed native release version, not the commit count.
           KSU_VERSION=$(sed -nE 's/^KSU_VERSION[[:space:]]*:=[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' kernel/Kbuild)
           if [ "$KSU_VERSION" != "$BAKASU_VERSION" ]; then
             echo "::error::BakaSU Pro version $KSU_VERSION does not match selected $BAKASU_VERSION"
