@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - "35275"
+          - "35285"
         default: "35275"
       UNI:
         description: "启用 Unicode 绕过修复"

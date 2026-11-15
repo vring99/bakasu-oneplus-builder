@@ -30,7 +30,9 @@ class ProWorkflowTests(unittest.TestCase):
                 if schema:
                     self.assertEqual(schema["default"], "35275", path.name)
                     if schema["type"] == "choice":
-                        self.assertEqual(schema["options"], ["35275"])
+                        full_entries = {"Build Kernel OnePlus MTK.yml", "Build Kernel OnePlus Snapdragon.yml"}
+                        expected = ["35275", "35285"] if path.name in full_entries else ["35275"]
+                        self.assertEqual(schema["options"], expected)
             for job in workflow.get("jobs", {}).values():
                 selected = job.get("with", {}).get(INPUT)
                 if selected:
