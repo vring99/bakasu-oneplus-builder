@@ -258,11 +258,12 @@ jobs:
 
       - name: Create and Enable 3G Swap
         run: |
+          SWAPFILE="$GITHUB_WORKSPACE/.build-swapfile"
           sudo swapoff -a
-          sudo fallocate -l 3G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          sudo fallocate -l 3G "$SWAPFILE"
+          sudo chmod 600 "$SWAPFILE"
+          sudo mkswap "$SWAPFILE"
+          sudo swapon "$SWAPFILE"
           free -h
 
       - name: Set Cache Environment
