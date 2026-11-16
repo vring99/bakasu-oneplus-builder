@@ -14,7 +14,7 @@ BUILDERS = ("build.yml", "build-make.yml") if GKI else ("Build Kernel OnePlus.ym
 INPUT = "bakasu_version" if GKI else "BAKASU_VERSION"
 PIN = "b89b9d960ec788460a7a6e4289f869762f306957"
 KERNEL_PIN = "60dd965f5f4923d34e9df4afb8f95a923447f7b4"
-KERNEL_PINS = {"35275": KERNEL_PIN, "35285": "3c240cb185fe6fa71bfd47c6d987fa8e2004194a"}
+KERNEL_PINS = {"35275": KERNEL_PIN, "35285": "d2b0371d9d42585b2e77c89707d4725cdff0b2bf"}
 BASH = os.environ.get("BAKASU_TEST_BASH", "bash")
 
 def read(name):

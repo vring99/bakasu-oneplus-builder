@@ -90,7 +90,7 @@ jobs:
         id: bakasu_version
         run: |
           case "$BAKASU_VERSION" in
-            35285) commit=3c240cb185fe6fa71bfd47c6d987fa8e2004194a ;;
+            35285) commit=d2b0371d9d42585b2e77c89707d4725cdff0b2bf ;;
             35275) commit=60dd965f5f4923d34e9df4afb8f95a923447f7b4 ;;
             *) echo "::error::Unsupported BakaSU Pro version: $BAKASU_VERSION"; exit 1 ;;
           esac
@@ -1131,6 +1131,20 @@ jobs:
             kernel/preinit/preinit.c kernel/preinit/preinit.h kernel/tools/susfs_compat.mk \
             kernel/manager/apk_sign.c kernel/manager/manager_sign.h
           echo "Using BakaSU Pro native integration; no SELinux source overlay"
+
+      - name: Repair native BakaSU Pro SUSFS type keys
+        id: bakasu_susfs_type_keys
+        if: inputs.BAKASU_VERSION == '35285' && env.KERNEL_VERSION != '6.18'
+        run: |
+          KERNEL_PLATFORM="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform"
+          test -f "$KERNEL_PLATFORM/common/arch/arm64/configs/gki_defconfig"
+          if ! grep -qx 'CONFIG_KSU_SUSFS=y' "$KERNEL_PLATFORM/common/arch/arm64/configs/gki_defconfig"; then
+            echo "SUSFS_TYPE_KEYS=disabled"
+            exit 0
+          fi
+          KSU_SOURCE="$KERNEL_PLATFORM/KernelSU"
+          python3 "$KSU_SOURCE/scripts/susfs_type_keys.py" --file "$KERNEL_PLATFORM/common/fs/susfs.c"
+          python3 "$KSU_SOURCE/scripts/susfs_type_keys.py" --file "$KERNEL_PLATFORM/common/fs/susfs.c" --check
 
       - name: Build Kernel Repo Toolchain Make
         if: ${{ inputs.FAST_BUILD }}
