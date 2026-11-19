@@ -14,7 +14,12 @@ BUILDERS = ("build.yml", "build-make.yml") if GKI else ("Build Kernel OnePlus.ym
 INPUT = "bakasu_version" if GKI else "BAKASU_VERSION"
 PIN = "b89b9d960ec788460a7a6e4289f869762f306957"
 KERNEL_PIN = "60dd965f5f4923d34e9df4afb8f95a923447f7b4"
-KERNEL_PINS = {"35275": KERNEL_PIN, "35285": "778c10e3fd57de16f40b6f6ee0f551ffb60f8d5d"}
+KERNEL_PINS = {
+    "35275": KERNEL_PIN,
+    "35285": "7f9baf5baf904edcbc9f339c792215b32fae0be0",
+    "35295": "36c14ab8cd7b69a707f6dd3aabd5805a837036fd",
+}
+FULL_ENTRIES = {"Build Kernel OnePlus MTK.yml": 21, "Build Kernel OnePlus Snapdragon.yml": 51}
 BASH = os.environ.get("BAKASU_TEST_BASH", "bash")
 
 def read(name):
@@ -28,16 +33,25 @@ class ProWorkflowTests(unittest.TestCase):
             for event in ("workflow_call", "workflow_dispatch"):
                 schema = (events.get(event) or {}).get("inputs", {}).get(INPUT)
                 if schema:
-                    self.assertEqual(schema["default"], "35275", path.name)
+                    selected_default = "35295" if path.name in FULL_ENTRIES or path.name in BUILDERS else "35275"
+                    self.assertEqual(schema["default"], selected_default, path.name)
                     if schema["type"] == "choice":
-                        full_entries = {"Build Kernel OnePlus MTK.yml", "Build Kernel OnePlus Snapdragon.yml"}
-                        expected = ["35275", "35285"] if path.name in full_entries else ["35275"]
+                        expected = list(KERNEL_PINS) if path.name in FULL_ENTRIES else ["35275"]
                         self.assertEqual(schema["options"], expected)
             for job in workflow.get("jobs", {}).values():
                 selected = job.get("with", {}).get(INPUT)
                 if selected:
+                    fallback = "35295" if path.name in FULL_ENTRIES else "35275"
                     self.assertIn(selected, ("35275", "${{ inputs." + INPUT + " }}",
-                                             "${{ inputs." + INPUT + " || '35275' }}"))
+                                             "${{ inputs." + INPUT + " || '" + fallback + "' }}"))
+
+    def test_full_matrix_preserves_entries_and_excludes_k40(self):
+        for name, count in FULL_ENTRIES.items():
+            job = next(iter(read(name)["jobs"].values()))
+            matrix = job["strategy"]["matrix"]["include"]
+            self.assertEqual(len(matrix), count, name)
+            self.assertFalse(any("k40" in item["file"].lower() for item in matrix), name)
+            self.assertEqual(job["uses"], "./.github/workflows/build-kernel-original-make.yml")
 
     def test_builders_use_native_source_without_overwriting_it(self):
         for name in BUILDERS:
@@ -63,7 +77,7 @@ class ProWorkflowTests(unittest.TestCase):
         for name in BUILDERS:
             job = next(iter(read(name)["jobs"].values()))
             selector = next(s for s in job["steps"] if s.get("id") == "bakasu_version")
-            for version in ("35285", "35275", "35274", "35273", "35270", "35268", "35240", "35239", "35238", "35237", "35236", "35235", "35226", "35227", "35266", ""):
+            for version in (*KERNEL_PINS, "35274", "35273", "35270", "35268", "35240", "35239", "35238", "35237", "35236", "35235", "35226", "35227", "35266", ""):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "env"
                     path.touch()

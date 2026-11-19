@@ -28,8 +28,8 @@ class NativeTypeKeysWorkflowTests(unittest.TestCase):
                          if step.get("id") == "bakasu_susfs_type_keys")
             step = source[index]
             expected = ("inputs.ksu_variant == 'BakaSU Pro' && "
-                        "inputs.bakasu_version == '35285' && inputs.enable_susfs") if GKI else (
-                        "inputs.BAKASU_VERSION == '35285' && env.KERNEL_VERSION != '6.18'")
+                        "(inputs.bakasu_version == '35285' || inputs.bakasu_version == '35295') && inputs.enable_susfs") if GKI else (
+                        "(inputs.BAKASU_VERSION == '35285' || inputs.BAKASU_VERSION == '35295') && env.KERNEL_VERSION != '6.18'")
             self.assertEqual(step["if"], expected, name)
             before = "\n".join(s.get("run", "") for s in source[:index])
             self.assertIn("checkout does not match pinned commit", before)
@@ -44,7 +44,9 @@ class NativeTypeKeysWorkflowTests(unittest.TestCase):
             run = step["run"]
             self.assertEqual(run.count('python3 "$KSU_SOURCE/scripts/susfs_type_keys.py"'), 2)
             self.assertIn('/common/fs/susfs.c" --check', run)
-            for forbidden in ("security/selinux", "|| true", "curl ", "cp ", "sed ", "git apply"):
+            self.assertEqual(run.count('python3 "$KSU_SOURCE/scripts/susfs_context_buffer.py"'), 2)
+            self.assertIn('/common/security/selinux/ss/services.c" --check', run)
+            for forbidden in ("|| true", "curl ", "cp ", "sed ", "git apply"):
                 self.assertNotIn(forbidden, run)
             result = subprocess.run([BASH, "-n", "-c", run], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
@@ -76,11 +78,14 @@ python3() {
                                             capture_output=True, text=True)
                     self.assertEqual(result.returncode, apply or check, result.stdout + result.stderr)
                     actual = calls.read_text().splitlines()
-                    self.assertEqual(len(actual), 1 if apply else 2)
+                    self.assertEqual(len(actual), 1 if apply else 2 if check else 4)
                     expected = f"{platform.as_posix()}/KernelSU/scripts/susfs_type_keys.py --file {platform.as_posix()}/common/fs/susfs.c"
                     self.assertEqual(actual[0], expected)
                     if not apply:
                         self.assertEqual(actual[1], expected + " --check")
+                    if not apply and not check:
+                        context = f"{platform.as_posix()}/KernelSU/scripts/susfs_context_buffer.py --file {platform.as_posix()}/common/security/selinux/ss/services.c"
+                        self.assertEqual(actual[2:], [context, context + " --check"])
 
     @unittest.skipIf(GKI, "GKI has an explicit workflow SUSFS gate")
     def test_disabled_susfs_does_not_invoke_native_script(self):

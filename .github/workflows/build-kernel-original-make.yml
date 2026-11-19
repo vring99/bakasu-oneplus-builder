@@ -31,9 +31,9 @@ on:
         default: "susfs-main/vring/"
       BAKASU_VERSION:
         type: string
-        description: "BakaSU Pro version (35275)"
+        description: "BakaSU Pro version"
         required: false
-        default: "35275"
+        default: "35295"
       UNI:
         type: boolean
         description: "启用 Unicode 绕过修复"
@@ -90,6 +90,7 @@ jobs:
         id: bakasu_version
         run: |
           case "$BAKASU_VERSION" in
+            35295) commit=36c14ab8cd7b69a707f6dd3aabd5805a837036fd ;;
             35285) commit=7f9baf5baf904edcbc9f339c792215b32fae0be0 ;;
             35275) commit=60dd965f5f4923d34e9df4afb8f95a923447f7b4 ;;
             *) echo "::error::Unsupported BakaSU Pro version: $BAKASU_VERSION"; exit 1 ;;
@@ -1134,7 +1135,7 @@ jobs:
 
       - name: Repair native BakaSU Pro SUSFS type keys
         id: bakasu_susfs_type_keys
-        if: inputs.BAKASU_VERSION == '35285' && env.KERNEL_VERSION != '6.18'
+        if: (inputs.BAKASU_VERSION == '35285' || inputs.BAKASU_VERSION == '35295') && env.KERNEL_VERSION != '6.18'
         run: |
           KERNEL_PLATFORM="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform"
           test -f "$KERNEL_PLATFORM/common/arch/arm64/configs/gki_defconfig"

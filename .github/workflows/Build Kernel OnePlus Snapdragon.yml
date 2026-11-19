@@ -10,7 +10,8 @@ on:
         options:
           - "35275"
           - "35285"
-        default: "35275"
+          - "35295"
+        default: "35295"
       UNI:
         description: "启用 Unicode 绕过修复"
         required: false
@@ -21,7 +22,7 @@ on:
       BAKASU_VERSION:
         required: false
         type: string
-        default: "35275"
+        default: "35295"
       UNI:
         required: false
         type: boolean
@@ -288,7 +289,7 @@ jobs:
     secrets: inherit
     with:
       FILE: ${{ matrix.file }}
-      BAKASU_VERSION: ${{ inputs.BAKASU_VERSION || '35275' }}
+      BAKASU_VERSION: ${{ inputs.BAKASU_VERSION || '35295' }}
       UNI: ${{ inputs.UNI }}
       HOOK: "manual"
       SUSFS_CI: "CI"
