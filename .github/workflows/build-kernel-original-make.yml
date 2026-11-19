@@ -90,7 +90,7 @@ jobs:
         id: bakasu_version
         run: |
           case "$BAKASU_VERSION" in
-            35285) commit=778c10e3fd57de16f40b6f6ee0f551ffb60f8d5d ;;
+            35285) commit=7f9baf5baf904edcbc9f339c792215b32fae0be0 ;;
             35275) commit=60dd965f5f4923d34e9df4afb8f95a923447f7b4 ;;
             *) echo "::error::Unsupported BakaSU Pro version: $BAKASU_VERSION"; exit 1 ;;
           esac
@@ -1145,6 +1145,8 @@ jobs:
           KSU_SOURCE="$KERNEL_PLATFORM/KernelSU"
           python3 "$KSU_SOURCE/scripts/susfs_type_keys.py" --file "$KERNEL_PLATFORM/common/fs/susfs.c"
           python3 "$KSU_SOURCE/scripts/susfs_type_keys.py" --file "$KERNEL_PLATFORM/common/fs/susfs.c" --check
+          python3 "$KSU_SOURCE/scripts/susfs_context_buffer.py" --file "$KERNEL_PLATFORM/common/security/selinux/ss/services.c"
+          python3 "$KSU_SOURCE/scripts/susfs_context_buffer.py" --file "$KERNEL_PLATFORM/common/security/selinux/ss/services.c" --check
 
       - name: Build Kernel Repo Toolchain Make
         if: ${{ inputs.FAST_BUILD }}
