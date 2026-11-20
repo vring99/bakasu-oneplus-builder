@@ -1,3 +1,9 @@
+## 上游来源
+
+- 直接上游及原始源仓：[Numbersf/Action-Build](https://github.com/Numbersf/Action-Build)
+
+本仓是独立的私有 OnePlus 编译仓库。后续对照上游时，将其配置为 `upstream`，先 `git fetch upstream --no-tags`，再按文件或提交检查天玑、骁龙工作流和机型矩阵的差异。按需合入，保留本仓的版本固定、机型选择和打包规则。
+
 **`简体中文`** | [English](README-en.md)
  
 [![Build](https://img.shields.io/badge/GitHub%20Actions-Build-181717?logo=github&logoColor=white&style=flat-square)](https://github.com/Numbersf/Action-Build/actions/workflows/Build%20SukiSU%20Ultra%20OnePlus.yml) [![Channel](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/taichi91) [![OnePlus Kernel Manifest](https://img.shields.io/badge/OnePlus%20Kernel%20Manifest-EB0029?logo=oneplus&logoColor=white&style=flat-square)](https://github.com/OnePlusOSS/kernel_manifest) [![Coolapk](https://img.shields.io/badge/Follow-Coolapk-3DDC84?style=flat-square&logo=android&logoColor=white)](http://www.coolapk.com/u/28259173)
@@ -209,4 +215,3 @@ AnyKernel3_SukiSUUltra_12896_oneplus_11_Android14.1.0_KPM_VFS.zip
 --添加 `zram` 模块的 `LZ4K` 压缩算法支持[@ShirkNeko](https://github.com/ShirkNeko)  
  
 --支持自动下载最新 `CI/Release` 的 `susfs` 模块并调用 `ksud` 安装、自动获取管理器`CI-APK`解压到`Anykernel3`但不安装  
- 
