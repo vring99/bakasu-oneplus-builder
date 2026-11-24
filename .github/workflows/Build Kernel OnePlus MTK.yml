@@ -1,5 +1,9 @@
 name:  oplus-bakasu-pro-vring-mtk
 
+permissions:
+  contents: write
+  actions: write
+
 on:
   workflow_dispatch:
     inputs:

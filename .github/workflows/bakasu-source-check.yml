@@ -6,6 +6,8 @@ on:
     paths:
       - scripts/checkout_bakasu.sh
       - .github/workflows/bakasu-source-check.yml
+      - .github/workflows/Build Kernel OnePlus MTK.yml
+      - .github/workflows/Build Kernel OnePlus Snapdragon.yml
   workflow_dispatch:
 
 permissions:

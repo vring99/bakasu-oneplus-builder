@@ -1,5 +1,9 @@
 name:  oplus-bakasu-pro-vring-snapdragon
 
+permissions:
+  contents: write
+  actions: write
+
 on:
   workflow_dispatch:
     inputs:
