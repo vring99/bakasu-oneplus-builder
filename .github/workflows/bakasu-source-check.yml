@@ -1,0 +1,37 @@
+name: Verify private BakaSU source
+
+on:
+  push:
+    branches: [codex/pro-35305]
+    paths:
+      - scripts/checkout_bakasu.sh
+      - .github/workflows/bakasu-source-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Verify exact source and native version
+        env:
+          BAKASU_DEPLOY_KEY: ${{ secrets.BAKASU_DEPLOY_KEY }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/source-check/common/drivers"
+          cd "$RUNNER_TEMP/source-check"
+          printf 'menu "Drivers"\nendmenu\n' > common/drivers/Kconfig
+          touch common/drivers/Makefile
+          bash "$GITHUB_WORKSPACE/scripts/checkout_bakasu.sh" 5d3c0d1ac8deaa5117526b07c5dca1b451a03c7c
+          grep -Fx 'KSU_VERSION := 35305' KernelSU/kernel/Kbuild
+          grep -Fx '4.3.0' KernelSU/kernel/VERSION
+          test -L common/drivers/kernelsu
+          if compgen -G "$RUNNER_TEMP/bakasu-ssh.*"; then
+            echo "::error::Temporary SSH data was not cleaned up"
+            exit 1
+          fi

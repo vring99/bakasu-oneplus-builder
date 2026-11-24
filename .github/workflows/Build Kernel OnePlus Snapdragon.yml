@@ -11,6 +11,7 @@ on:
           - "35275"
           - "35285"
           - "35295"
+          - "35305"
         default: "35295"
       UNI:
         description: "启用 Unicode 绕过修复"

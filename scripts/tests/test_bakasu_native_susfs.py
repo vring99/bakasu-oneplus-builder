@@ -88,7 +88,7 @@ class NativePreflightTests(unittest.TestCase):
             workflow = yaml.safe_load((ROOT / ".github/workflows" / name).read_text(encoding="utf-8"))
             job = next(iter(workflow["jobs"].values()))
             run = next(s["run"] for s in job["steps"]
-                       if 'bash "$RUNNER_TEMP/bakasu-setup.sh"' in s.get("run", ""))
+                       if 'scripts/checkout_bakasu.sh" "$BAKASU_COMMIT"' in s.get("run", ""))
             run = run.replace("${{ inputs.ksu_variant }}", "BakaSU Pro")
             with self.subTest(builder=name), tempfile.TemporaryDirectory() as directory:
                 workspace = Path(directory)
@@ -114,43 +114,20 @@ class NativePreflightTests(unittest.TestCase):
                 temp = workspace / "runner-temp"
                 temp.mkdir()
                 env = dict(os.environ, BAKASU_VERSION="30701", BAKASU_COMMIT=pin,
-                           GIT_CONFIG_COUNT="1", GIT_CONFIG_KEY_0="core.autocrlf",
+                           GIT_CONFIG_COUNT="2", GIT_CONFIG_KEY_0="core.autocrlf",
                            GIT_CONFIG_VALUE_0="false",
+                           GIT_CONFIG_KEY_1=f"url.{remote.as_posix()}.insteadOf",
+                           GIT_CONFIG_VALUE_1="git@github.com:vring99/BakaSU.git",
+                           BAKASU_DEPLOY_KEY="test-fixture-not-a-key",
+                           GITHUB_WORKSPACE=ROOT.as_posix(),
                            RUNNER_TEMP=temp.as_posix(), TEST_REMOTE=remote.as_posix(),
                            GITHUB_ENV=(workspace / "env").as_posix(),
                            GITHUB_OUTPUT=(workspace / "output").as_posix())
-                # Redirect only the external downloads; execute the real setup and Git operations.
-                downloads = r'''
-git() {
-    if [ "$1" = clone ]; then
-        local arg args=() private=false
-        for arg in "$@"; do
-            case "$arg" in
-                https://github.com/vring99/BakaSU|https://github.com/vring99/BakaSU.git)
-                    args+=("$TEST_REMOTE"); private=true ;;
-                https://*) echo "unexpected repository: $arg" >&2; return 89 ;;
-                *) args+=("$arg") ;;
-            esac
-        done
-        "$private" || return 90
-        command git "${args[@]}"
-    else
-        command git "$@"
-    fi
-}
-curl() {
-    case "$*" in
-        *"https://raw.githubusercontent.com/vring99/BakaSU/$BAKASU_COMMIT/kernel/setup.sh"*)
-            command cp "$TEST_REMOTE/kernel/setup.sh" "$RUNNER_TEMP/bakasu-setup.sh" ;;
-        *) return 91 ;;
-    esac
-}
-export -f git curl
-'''
-                result = subprocess.run([BASH, "-e", "-c", downloads + run],
+                result = subprocess.run([BASH, "-e", "-c", run],
                                         cwd=platform if GKI else workspace, env=env,
                                         capture_output=True, text=True, encoding="utf-8")
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(list(temp.iterdir()), [])
                 ksu = platform / "KernelSU"
                 actual = subprocess.check_output(["git", "-C", str(ksu), "rev-parse", "HEAD"],
                                                  text=True).strip()

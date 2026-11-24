@@ -18,6 +18,7 @@ KERNEL_PINS = {
     "35275": KERNEL_PIN,
     "35285": "7f9baf5baf904edcbc9f339c792215b32fae0be0",
     "35295": "36c14ab8cd7b69a707f6dd3aabd5805a837036fd",
+    "35305": "5d3c0d1ac8deaa5117526b07c5dca1b451a03c7c",
 }
 FULL_ENTRIES = {"Build Kernel OnePlus MTK.yml": 21, "Build Kernel OnePlus Snapdragon.yml": 51}
 BASH = os.environ.get("BAKASU_TEST_BASH", "bash")
@@ -57,7 +58,9 @@ class ProWorkflowTests(unittest.TestCase):
         for name in BUILDERS:
             job = next(iter(read(name)["jobs"].values()))
             runs = "\n".join(s.get("run", "") for s in job["steps"])
-            self.assertIn("raw.githubusercontent.com/vring99/BakaSU/$BAKASU_COMMIT/kernel/setup.sh", runs)
+            self.assertIn('scripts/checkout_bakasu.sh" "$BAKASU_COMMIT"', runs)
+            step = next(s for s in job["steps"] if "scripts/checkout_bakasu.sh" in s.get("run", ""))
+            self.assertIn("secrets.BAKASU_DEPLOY_KEY", step["env"]["BAKASU_DEPLOY_KEY"])
             for pin in KERNEL_PINS.values():
                 self.assertIn(pin, runs)
             self.assertNotIn("SUSFS_KSU_COMMIT", job.get("env", {}))

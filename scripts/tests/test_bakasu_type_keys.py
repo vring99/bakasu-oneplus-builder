@@ -32,7 +32,9 @@ class NativeTypeKeysWorkflowTests(unittest.TestCase):
                         "(inputs.BAKASU_VERSION == '35285' || inputs.BAKASU_VERSION == '35295') && env.KERNEL_VERSION != '6.18'")
             self.assertEqual(step["if"], expected, name)
             before = "\n".join(s.get("run", "") for s in source[:index])
-            self.assertIn("checkout does not match pinned commit", before)
+            self.assertIn('scripts/checkout_bakasu.sh" "$BAKASU_COMMIT"', before)
+            helper = (ROOT / "scripts/checkout_bakasu.sh").read_text(encoding="utf-8")
+            self.assertIn('$(git -C KernelSU rev-parse HEAD) == "$pin"', helper)
             self.assertIn("kernel_patches/fs/*", before)
             self.assertTrue(any(s.get("id") == "bakasu_susfs_setup" for s in source[:index]))
             self.assertTrue(any("Build Kernel" in s.get("name", "") or
