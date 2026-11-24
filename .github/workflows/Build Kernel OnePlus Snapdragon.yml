@@ -1,6 +1,9 @@
 name:  oplus-bakasu-pro-vring-snapdragon
 
 on:
+  push:
+    branches: [vring-resukisu]
+    paths: ['.github/workflows/Build Kernel OnePlus Snapdragon.yml']
   workflow_dispatch:
     inputs:
       BAKASU_VERSION:
@@ -29,6 +32,7 @@ on:
 
 jobs:
   vring-bakasu-snapdragon:
+    if: github.event_name != 'push'
     name: "${{ matrix.file }}"
     strategy:
       fail-fast: false
