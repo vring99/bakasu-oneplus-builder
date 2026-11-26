@@ -45,51 +45,9 @@ jobs:
             sched: false
             ipv6: true
 
-          - file: oneplus_ace2_pro_b
-            sched: false
-            ipv6: true
-
           - file: oneplus_ace3_b
             sched: false
             ipv6: true
-
-          - file: oneplus_ace5_118
-            sched: false
-            ipv6: true
-          - file: oneplus_ace5_141
-            sched: false
-            ipv6: true
-
-
-          - file: oneplus_pad_pro
-            sched: false
-            ipv6: true
-
-          - file: oneplus_pad_pro_v
-            sched: false
-            ipv6: true
-
-          - file: oneplus_pad_pro_b
-            sched: false
-            ipv6: true
-
-          - file: oneplus_pad2_v
-            sched: false
-            ipv6: true
-          #- file: oneplus_pad2_b
-          #  sched: false
-          #  ipv6: true
-          - file: oneplus_pad_2_pro_89_b
-            sched: true
-            ipv6: true
-          #- file: oneplus_pad2pro_30
-          #  sched: true
-          #  ipv6: true
-
-          - file: oneplus_13_b
-            sched: true
-            ipv6: true
-
 
           - file: oneplus_ace_6t_Canary
             sched: false
